@@ -27,7 +27,7 @@ isUppercase :: Char -> Bool
 isUppercase c = 'A' <= c && c <= 'Z'
 
 isIdent :: Char -> Bool
-isIdent c = isLowercase c || isUppercase c
+isIdent = isLowercase ||| isUppercase
 
 nextToken :: [Ranged Char] -> Result (Ranged Token, [Ranged Char])
 nextToken [] =  Err Eof
