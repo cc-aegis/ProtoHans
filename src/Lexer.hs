@@ -1,21 +1,22 @@
-module Lexer (tokenize) where
+module Lexer (tokenizeStr) where
 
 import Data.Char (isSpace)
 
-import Ranged (Ranged)
+import Ranged (Ranged(..), getStart, getEnd, getContent)
 import Result (CompilerError(..), Result(..))
-import Token (Token)
+import Token (Token(..))
 
 tokenizeStr :: String -> Result [Ranged Token]
-tokenizeStr = tokenize . zip [0..]
+tokenizeStr = tokenize . (mkRange <$>) . zip [0..]
+    where mkRange (i, c) = Ranged (pure i) (pure i) c
 
 tokenize :: [Ranged Char] -> Result [Ranged Token]
 tokenize [] = Ok []
-tokenize src
-    | nextToken == Err Eof = Ok []
+tokenize src -- TODO: case of
+    | nextToken' == Err Eof = Ok []
     | otherwise = do
-        (token, src') <- nextToken'
-        tokens' <- tokenize src'
+        (token, rest) <- nextToken'
+        tokens <- tokenize rest
         return $ token : tokens
     where nextToken' = nextToken src
 
@@ -29,31 +30,31 @@ isIdent :: Char -> Bool
 isIdent c = isLowercase c || isUppercase c
 
 nextToken :: [Ranged Char] -> Result (Ranged Token, [Ranged Char])
-nextToken [] =  Err $ Eof
-nextToken (Ranged { start, content = ':' } : Ranged { end, content = ':' } : rest) =
-    Ok (Ranged { start, end, content = Token.TypeSpec }, rest)
-nextToken (Ranged { start, content = '-' } : Ranged { end, content = '>' } : rest) =
-    Ok (Ranged { start, end, content = Token.Arrow }, rest)
-nextToken (Ranged { start, end, content = '=' } : rest) =
-    Ok (Ranged { start, end, content = Token.Bind }, rest)
-nextToken (Ranged { start, end, content = '$' } : rest) =
-    Ok (Ranged { start, end, content = Token.DollarSign }, rest)
-nextToken (Ranged { start, end, content = '*' } : rest) =
-    Ok (Ranged { start, end, content = Token.Asterisk }, rest)
-nextToken (Ranged { start, end, content = '|' } : rest) =
-    Ok (Ranged { start, end, content = Token.Pipe }, rest)
-nextToken (Ranged { start, end, content = '-' } : rest) =
-    Ok (Ranged { start, end, content = Token.Minus }, rest)
+nextToken [] =  Err Eof
+nextToken (Ranged start _ ':' : Ranged _ end ':' : rest) =
+    Ok (Ranged start end Token.TypeSpec, rest)
+nextToken (Ranged start _ '-' : Ranged _ end '>' : rest) =
+    Ok (Ranged start end Token.Arrow, rest)
+nextToken (Ranged start end '=' : rest) =
+    Ok (Ranged start end Token.Bind, rest)
+nextToken (Ranged start end '$' : rest) =
+    Ok (Ranged start end Token.DollarSign, rest)
+nextToken (Ranged start end '*' : rest) =
+    Ok (Ranged start end Token.Asterisk, rest)
+nextToken (Ranged start end '|' : rest) =
+    Ok (Ranged start end Token.Pipe, rest)
+nextToken (Ranged start end '-' : rest) =
+    Ok (Ranged start end Token.Minus, rest)
 nextToken (c:cs)
-    | isSpace c = nextToken cs
+    | isSpace $ getContent c = nextToken cs
     | isLowercase $ getContent c = parseIdent (c:cs)
     | isUppercase $ getContent c = parseTypeName (c:cs)
     | otherwise = Err $ UnexpectedChar (getStart c) (getContent c)
 
 parseIdent :: [Ranged Char] -> Result (Ranged Token, [Ranged Char])
-parseIdent src = Ok (Ident <$> sequence ident) rest
-    where (ident, rest) = span isIdent src
+parseIdent src = Ok (Token.Ident <$> sequence ident, rest)
+    where (ident, rest) = span (isIdent . getContent) src
 
 parseTypeName :: [Ranged Char] -> Result (Ranged Token, [Ranged Char])
-parseTypeName src = Ok (TypeName <$> sequence ident) rest
-    where (ident, rest) = span isIdent src
+parseTypeName src = Ok (Token.TypeName <$> sequence ident, rest)
+    where (ident, rest) = span (isIdent . getContent) src

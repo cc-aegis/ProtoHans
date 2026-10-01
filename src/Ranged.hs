@@ -1,25 +1,28 @@
-module Ranged (Ranged, getStart, getEnd, getContent) where
+module Ranged (Ranged(..), getStart, getEnd, getContent) where
 
 import Data.Semigroup
 
-data Ranged a = Ranged { start :: Min Int, end :: Max Int, content :: a }
-    deriving (Show)
+data Ranged a = Ranged (Min Int) (Max Int) a
+    deriving (Eq, Show)
 
 instance Functor Ranged where
-    fmap f (Ranged { start, end, content }) = Ranged { start, end, content = f content }
+    fmap f (Ranged start end content) = Ranged start end $ f content
 
 instance Applicative Ranged where
-    pure content = Ranged { start = mempty, end = mempty, content }
-    Ranged { start, end, content = f } <*> Ranged { start = start', end = end', content } = Ranged { start = start <> start', end = end <> end', content = f content }
+    pure content = Ranged mempty mempty content
+    (Ranged start end f) <*> (Ranged start' end' content) = Ranged (start <> start') (end <> end') (f content)
+
+instance Monad Ranged where
+    (Ranged start end content) >>= f = f content >>= Ranged start end
 
 instance Semigroup a => Semigroup (Ranged a) where
-  Ranged { start, end, content } <> Ranged { start = start', end = end', content = content' } = Ranged { start = start <> start', end = end <> end', content = content <> content' }
+  (Ranged start end content) <> (Ranged start' end' content') = Ranged (start <> start') (end <> end') (content <> content')
 
 getStart :: Ranged a -> Int
-getStart Ranged { start = Min start } = start
+getStart (Ranged (Min start) _ _) = start
 
 getEnd :: Ranged a -> Int
-getEnd Ranged { end = Max end } = end
+getEnd (Ranged _ (Max end) _) = end
 
 getContent :: Ranged a -> a
-getContent Ranged { content } = content
+getContent (Ranged _ _ content) = content

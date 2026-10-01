@@ -2,8 +2,8 @@
 
 module Main (main) where
 
-import Lexer
+import Lexer (tokenizeStr)
 
 main :: IO ()
 main = do
-    print $ tokenizeStr ""
+    print $ tokenizeStr "idk :: List a -> a"

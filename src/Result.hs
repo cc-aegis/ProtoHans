@@ -1,9 +1,11 @@
-module Result (CompilerError, Result) where
+module Result (CompilerError(..), Result(..)) where
 
 data Result a = Ok a | Err CompilerError
+    deriving (Eq, Show)
 
 data CompilerError = Eof
     | UnexpectedChar Int Char
+    deriving (Eq, Show)
 
 instance Functor Result where
     fmap f (Ok a) = Ok $ f a

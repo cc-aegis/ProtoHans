@@ -1,4 +1,4 @@
-module Token (Token) where
+module Token (Token(..)) where
 
 data Token = Ident String -- thing
     | TypeName String -- Thing
@@ -12,3 +12,4 @@ data Token = Ident String -- thing
     | Asterisk
     | DollarSign
     | Minus
+    deriving (Eq, Show)
