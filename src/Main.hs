@@ -5,6 +5,4 @@ module Main (main) where
 import Lexer (tokenizeStr)
 
 main :: IO ()
-main = do
-    src <- readFile "examples/fib.hs"
-    print $ tokenizeStr src
+main = readFile "examples/fib.hs" >>= print . tokenizeStr
