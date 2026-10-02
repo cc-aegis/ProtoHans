@@ -3,7 +3,7 @@ module Ranged (Ranged(..), getStart, getEnd, getContent) where
 import Data.Semigroup
 
 data Ranged a = Ranged (Min Int) (Max Int) a
-    deriving (Eq, Show)
+    deriving (Eq)
 
 instance Functor Ranged where
     fmap f (Ranged start end content) = Ranged start end $ f content
@@ -17,6 +17,9 @@ instance Monad Ranged where
 
 instance Semigroup a => Semigroup (Ranged a) where
   (Ranged start end content) <> (Ranged start' end' content') = Ranged (start <> start') (end <> end') (content <> content')
+
+instance Show a => Show (Ranged a) where
+    show (Ranged (Min start) (Max end) content) = "[" ++ show start ++ ".." ++ show end ++ "]" ++ show content
 
 getStart :: Ranged a -> Int
 getStart (Ranged (Min start) _ _) = start

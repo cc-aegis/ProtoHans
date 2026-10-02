@@ -12,4 +12,7 @@ data Token = Ident String -- thing
     | Asterisk
     | DollarSign
     | Minus
+    | Underscore
+    | LParen
+    | RParen
     deriving (Eq, Show)

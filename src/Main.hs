@@ -6,4 +6,5 @@ import Lexer (tokenizeStr)
 
 main :: IO ()
 main = do
-    print $ tokenizeStr "idk :: List a -> a"
+    src <- readFile "examples/fib.hs"
+    print $ tokenizeStr src

@@ -1,6 +1,6 @@
 module Lexer (tokenizeStr) where
 
-import Data.Char (isSpace)
+import Data.Char (isSpace, isLower, isUpper, isAlphaNum, isDigit)
 
 import Ranged (Ranged(..), getStart, getEnd, getContent)
 import Result (CompilerError(..), Result(..))
@@ -20,17 +20,9 @@ tokenize src -- TODO: case of
         return $ token : tokens
     where nextToken' = nextToken src
 
-isLowercase :: Char -> Bool
-isLowercase c = 'a' <= c && c <= 'z'
-
-isUppercase :: Char -> Bool
-isUppercase c = 'A' <= c && c <= 'Z'
-
-isIdent :: Char -> Bool
-isIdent = isLowercase ||| isUppercase
-
 nextToken :: [Ranged Char] -> Result (Ranged Token, [Ranged Char])
 nextToken [] =  Err Eof
+-- TODO: parse Operators in seperate function at end and combine all single-character cases
 nextToken (Ranged start _ ':' : Ranged _ end ':' : rest) =
     Ok (Ranged start end Token.TypeSpec, rest)
 nextToken (Ranged start _ '-' : Ranged _ end '>' : rest) =
@@ -45,16 +37,27 @@ nextToken (Ranged start end '|' : rest) =
     Ok (Ranged start end Token.Pipe, rest)
 nextToken (Ranged start end '-' : rest) =
     Ok (Ranged start end Token.Minus, rest)
+nextToken (Ranged start end '_' : rest) =
+    Ok (Ranged start end Token.Underscore, rest)
+nextToken (Ranged start end '(' : rest) =
+    Ok (Ranged start end Token.LParen, rest)
+nextToken (Ranged start end ')' : rest) =
+    Ok (Ranged start end Token.RParen, rest)
 nextToken (c:cs)
     | isSpace $ getContent c = nextToken cs
-    | isLowercase $ getContent c = parseIdent (c:cs)
-    | isUppercase $ getContent c = parseTypeName (c:cs)
+    | isLower $ getContent c = parseIdent (c:cs)
+    | isUpper $ getContent c = parseTypeName (c:cs)
+    | isDigit $ getContent c = parseNumber (c:cs)
     | otherwise = Err $ UnexpectedChar (getStart c) (getContent c)
 
 parseIdent :: [Ranged Char] -> Result (Ranged Token, [Ranged Char])
 parseIdent src = Ok (Token.Ident <$> sequence ident, rest)
-    where (ident, rest) = span (isIdent . getContent) src
+    where (ident, rest) = span (isAlphaNum . getContent) src
 
 parseTypeName :: [Ranged Char] -> Result (Ranged Token, [Ranged Char])
 parseTypeName src = Ok (Token.TypeName <$> sequence ident, rest)
-    where (ident, rest) = span (isIdent . getContent) src
+    where (ident, rest) = span (isAlphaNum . getContent) src
+
+parseNumber :: [Ranged Char] -> Result (Ranged Token, [Ranged Char])
+parseNumber src = Ok (Token.Number <$> sequence ident, rest)
+    where (ident, rest) = span (isDigit . getContent) src
