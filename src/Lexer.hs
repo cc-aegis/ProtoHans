@@ -23,7 +23,6 @@ tokenize src -- TODO: case of
 
 nextToken :: [Ranged Char] -> Result (Ranged Token, [Ranged Char])
 nextToken [] =  Err Eof
-
 nextToken (c:cs)
     | isSpace $ getContent c = nextToken cs
     | isLower $ getContent c = parseIdent (c:cs)
