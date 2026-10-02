@@ -1,6 +1,7 @@
 module Lexer (tokenizeStr) where
 
 import Data.Char (isSpace, isLower, isUpper, isAlphaNum, isDigit)
+import Data.Semigroup (Min(..))
 
 import Ranged (Ranged(..), getStart, getEnd, getContent)
 import Result (CompilerError(..), Result(..))
@@ -22,33 +23,13 @@ tokenize src -- TODO: case of
 
 nextToken :: [Ranged Char] -> Result (Ranged Token, [Ranged Char])
 nextToken [] =  Err Eof
--- TODO: parse Operators in seperate function at end and combine all single-character cases
-nextToken (Ranged start _ ':' : Ranged _ end ':' : rest) =
-    Ok (Ranged start end Token.TypeSpec, rest)
-nextToken (Ranged start _ '-' : Ranged _ end '>' : rest) =
-    Ok (Ranged start end Token.Arrow, rest)
-nextToken (Ranged start end '=' : rest) =
-    Ok (Ranged start end Token.Bind, rest)
-nextToken (Ranged start end '$' : rest) =
-    Ok (Ranged start end Token.DollarSign, rest)
-nextToken (Ranged start end '*' : rest) =
-    Ok (Ranged start end Token.Asterisk, rest)
-nextToken (Ranged start end '|' : rest) =
-    Ok (Ranged start end Token.Pipe, rest)
-nextToken (Ranged start end '-' : rest) =
-    Ok (Ranged start end Token.Minus, rest)
-nextToken (Ranged start end '_' : rest) =
-    Ok (Ranged start end Token.Underscore, rest)
-nextToken (Ranged start end '(' : rest) =
-    Ok (Ranged start end Token.LParen, rest)
-nextToken (Ranged start end ')' : rest) =
-    Ok (Ranged start end Token.RParen, rest)
+
 nextToken (c:cs)
     | isSpace $ getContent c = nextToken cs
     | isLower $ getContent c = parseIdent (c:cs)
     | isUpper $ getContent c = parseTypeName (c:cs)
     | isDigit $ getContent c = parseNumber (c:cs)
-    | otherwise = Err $ UnexpectedChar (getStart c) (getContent c)
+    | otherwise = tryParseOperator (c:cs)
 
 parseIdent :: [Ranged Char] -> Result (Ranged Token, [Ranged Char])
 parseIdent src = Ok (Token.Ident <$> sequence ident, rest)
@@ -61,3 +42,20 @@ parseTypeName src = Ok (Token.TypeName <$> sequence ident, rest)
 parseNumber :: [Ranged Char] -> Result (Ranged Token, [Ranged Char])
 parseNumber src = Ok (Token.Number <$> sequence ident, rest)
     where (ident, rest) = span (isDigit . getContent) src
+
+tryParseOperator :: [Ranged Char] -> Result (Ranged Token, [Ranged Char])
+tryParseOperator (Ranged start _ ':' : Ranged _ end ':' : rest) = Ok (Ranged start end Token.TypeSpec, rest)
+tryParseOperator (Ranged start _ '-' : Ranged _ end '>' : rest) = Ok (Ranged start end Token.Arrow, rest)
+tryParseOperator (Ranged start end operator : rest) = do
+    token <- case operator of
+        '=' -> Ok Token.Bind
+        '$' -> Ok Token.DollarSign
+        '*' -> Ok Token.Asterisk
+        '|' -> Ok Token.Pipe
+        '-' -> Ok Token.Minus
+        '=' -> Ok Token.Bind
+        '_' -> Ok Token.Underscore
+        '(' -> Ok Token.LParen
+        ')' -> Ok Token.RParen
+        _ -> Err $ UnexpectedChar (getMin start) operator
+    return (Ranged start end token, rest)
