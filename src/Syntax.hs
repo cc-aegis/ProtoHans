@@ -2,17 +2,19 @@ module Syntax (Definitions, Type(..), AstItem(..), PatItem(..), BinOperator(..))
 
 import Data.Map (Map)
 
-type Definitions = Map String Type AstItem
+type Definitions = Map String Definition
 
-data Type = Int | World | Function Type Type
+type Definition = (Ranged String, Ranged Type, Ranged AstItem)
+
+data Type = Int | World | Function (Ranged Type) (Ranged Type)
 
 data AstItem = Lambda String AstItem
-    | Match AstItem [(PatItem, AstItem)]
-    | AstInt Int
-    | Ivocation AstItem AstItem
-    | Binding String
-    | BinOp BinOperator AstItem AstItem
+    | Match (Ranged AstItem) [(Ranged PatItem, Ranged AstItem)]
+    | AstInt (Ranged Int)
+    | Ivocation (Ranged AstItem) (Ranged AstItem)
+    | Binding (Ranged String)
+    | BinOp (Ranged BinOperator) (Ranged AstItem) (Ranged AstItem)
 
-data PatItem = PatInt Int | Any
+data PatItem = PatInt (Ranged Int) | Any
 
 data BinOperator = Sub | Mul | Dollar
