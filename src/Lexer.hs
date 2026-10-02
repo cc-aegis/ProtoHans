@@ -32,11 +32,16 @@ nextToken (c:cs)
     | otherwise = tryParseOperator (c:cs)
 
 parseIdent :: [Ranged Char] -> Result (Ranged Token, [Ranged Char])
-parseIdent src = Ok (Token.Ident <$> sequence ident, rest)
+parseIdent src = case sequence ident of
+    (Ranged start end "match") -> Ok (Ranged start end Token.Match, rest)
+    ident' -> Ok (Token.Ident <$> ident', rest)
     where (ident, rest) = span (isAlphaNum . getContent) src
 
 parseTypeName :: [Ranged Char] -> Result (Ranged Token, [Ranged Char])
-parseTypeName src = Ok (Token.TypeName <$> sequence ident, rest)
+parseTypeName src = case sequence ident of
+    (Ranged start end "Int") -> Ok (Ranged start end Token.Int, rest)
+    (Ranged start end "World") -> Ok (Ranged start end Token.World, rest)
+    ident' -> Ok (Token.TypeName <$> ident', rest)
     where (ident, rest) = span (isAlphaNum . getContent) src
 
 parseNumber :: [Ranged Char] -> Result (Ranged Token, [Ranged Char])

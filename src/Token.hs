@@ -15,4 +15,5 @@ data Token = Ident String -- thing
     | Underscore
     | LParen
     | RParen
+    | Match
     deriving (Eq, Show)
