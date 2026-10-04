@@ -1,4 +1,4 @@
-module Ranged (Ranged(..), getStart, getEnd, getContent) where
+module Ranged (Ranged(..), getStart, getEnd, getContent, nest) where
 
 import Data.Semigroup
 
@@ -20,6 +20,9 @@ instance Semigroup a => Semigroup (Ranged a) where
 
 instance Show a => Show (Ranged a) where
     show (Ranged (Min start) (Max end) content) = "[" ++ show start ++ ".." ++ show end ++ "]" ++ show content
+
+nest :: Ranged a -> Ranged (Ranged a)
+nest (Ranged start end a) = Ranged start end (Ranged start end a)
 
 getStart :: Ranged a -> Int
 getStart (Ranged (Min start) _ _) = start

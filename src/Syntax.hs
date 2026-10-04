@@ -1,20 +1,22 @@
-module Syntax (Definitions, Type(..), AstItem(..), PatItem(..), BinOperator(..)) where
+module Syntax (Definitions, Definition, Type(..), Expr(..), Pat(..), BinOperator(..)) where
+
+import Ranged (Ranged)
 
 import Data.Map (Map)
 
 type Definitions = Map String Definition
 
-type Definition = (Ranged String, Ranged Type, Ranged AstItem)
+data Definition = Definition (Ranged String) (Ranged Type) (Ranged Expr)
 
-data Type = Int | World | Function (Ranged Type) (Ranged Type)
+data Type = TyInt | TyWorld | TyFunction (Ranged Type) (Ranged Type)
 
-data AstItem = Lambda String AstItem
-    | Match (Ranged AstItem) [(Ranged PatItem, Ranged AstItem)]
-    | AstInt (Ranged Int)
-    | Ivocation (Ranged AstItem) (Ranged AstItem)
+data Expr = Lambda String Expr
+    | Match (Ranged Expr) [(Ranged Pat, Ranged Expr)]
+    | Constant (Ranged Int)
+    | Ivocation (Ranged Expr) (Ranged Expr)
     | Binding (Ranged String)
-    | BinOp (Ranged BinOperator) (Ranged AstItem) (Ranged AstItem)
+    | BinOp (Ranged BinOperator) (Ranged Expr) (Ranged Expr)
 
-data PatItem = PatInt (Ranged Int) | Any
+data Pat = PatInt (Ranged Int) | Any
 
 data BinOperator = Sub | Mul | Dollar

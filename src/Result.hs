@@ -1,10 +1,14 @@
 module Result (CompilerError(..), Result(..)) where
 
+import Ranged (Ranged)
+import Token (Token(..))
+
 data Result a = Ok a | Err CompilerError
     deriving (Eq, Show)
 
 data CompilerError = Eof
     | UnexpectedChar Int Char
+    | UnexpectedToken (Ranged Token)
     deriving (Eq, Show)
 
 instance Functor Result where
