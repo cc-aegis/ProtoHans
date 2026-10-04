@@ -57,7 +57,6 @@ tryParseOperator (Ranged start end operator : rest) = do
         '*' -> Ok Token.Asterisk
         '|' -> Ok Token.Pipe
         '-' -> Ok Token.Minus
-        '=' -> Ok Token.Bind
         '_' -> Ok Token.Underscore
         '(' -> Ok Token.LParen
         ')' -> Ok Token.RParen
