@@ -38,7 +38,34 @@ parseType tokens = do
         _ -> Ok (lht, tokens')
 
 parseExpr :: [Ranged Token] -> Result (Ranged Expr, [Ranged Token])
-parseExpr tokens = Ok (pure $ ExConstant (pure 0), tokens) -- PLACEHOLDER
+parseExpr (Ranged start end (Token.Ident ident) : Ranged _ _ Token.Arrow : tokens) = do
+    (expr, tokens') <- parseExpr tokens
+    return (Ranged start (pure $ getEnd expr) (ExLambda (Ranged start end ident) expr), tokens')
+--parseExpr (Ranged start _ Token.Match : tokens) = do
+--    (value, tokens') <- parseExpr tokens
+--    tokens'' <- expectToken Token.With tokens'
+--    (cases, tokens''') <- parseMatchCases tokens''
+--    return TODO
+--
+--    where
+--        parseMatchCases (Ranged _ _ Token.Pipe : tokens) = do
+--
+--        parseMatchCases _ = Ok []
+parseExpr tokens = parseTinyExpr tokens
+
+parseTinyExpr :: [Ranged Token] -> Result (Ranged Expr, [Ranged Token])
+parseTinyExpr [] = Err Eof
+parseTinyExpr (Ranged start _ Token.LParen : tokens) = do
+    (Ranged _ _ body, tokens') <- parseExpr tokens
+    (Ranged _ end _, tokens'') <- expectCondToken (==Token.RParen) tokens'
+    return (Ranged start end body, tokens'')
+parseTinyExpr (Ranged start end (Token.Ident ident) : tokens) =
+    return (Ranged start end $ ExBinding (Ranged start end ident), tokens)
+parseTinyExpr (Ranged start end (Token.Number number) : tokens) =
+    return (Ranged start end $ ExConstant . (Ranged start end) . read $ number, tokens)
+parseTinyExpr (token : _) = Err $ UnexpectedToken token
+
+---parseExpr tokens = Ok (pure $ ExConstant (pure 0), tokens) -- PLACEHOLDER
 
     -- DAS IST BS
 --expectIdent :: [Ranged Token] -> Result (Ranged String, Ranged Token)
@@ -58,6 +85,12 @@ expectToken _ [] = Err Eof
 expectToken token (token' : tokens)
     | token == getContent token' = Ok tokens
     | otherwise = Err $ UnexpectedToken token'
+
+expectCondToken :: (Token -> Bool) -> [Ranged Token] -> Result (Ranged Token, [Ranged Token])
+expectCondToken _ [] = Err Eof
+expectCondToken f (t:ts)
+    | f $ getContent t = Ok (t, ts)
+    | otherwise = Err $ UnexpectedToken t
 
 tryMapRanged :: (a -> Result b) -> Ranged a -> Result (Ranged b)
 tryMapRanged f (Ranged start end a) = case f a of

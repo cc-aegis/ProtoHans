@@ -33,6 +33,7 @@ nextToken (c:cs)
 parseIdent :: [Ranged Char] -> Result (Ranged Token, [Ranged Char])
 parseIdent src = case sequence ident of
     (Ranged start end "match") -> Ok (Ranged start end Token.Match, rest)
+    (Ranged start end "with") -> Ok (Ranged start end Token.With, rest)
     ident' -> Ok (Token.Ident <$> ident', rest)
     where (ident, rest) = span (isAlphaNum . getContent) src
 

@@ -12,7 +12,7 @@ data Definition = Definition (Ranged String) (Ranged Type) (Ranged Expr)
 data Type = TyInt | TyWorld | TyFunction (Ranged Type) (Ranged Type)
     deriving (Show)
 
-data Expr = ExLambda String Expr
+data Expr = ExLambda (Ranged String) (Ranged Expr)
     | ExMatch (Ranged Expr) [(Ranged Pat, Ranged Expr)]
     | ExConstant (Ranged Int)
     | ExIvocation (Ranged Expr) (Ranged Expr)
