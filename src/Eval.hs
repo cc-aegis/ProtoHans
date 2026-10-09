@@ -1,6 +1,6 @@
 module Eval (eval, invokeMain) where
 
-import Data.Map ((!))
+import Data.Map ((!), (!?))
 import Ranged
 import Syntax
 
@@ -12,7 +12,9 @@ eval _ lambda@(ExLambda _ _) = lambda
 eval defs (ExMatch value cases) = eval defs $ getContent $ evalMatch defs (eval defs <$> value) cases
 eval _ const@(ExConstant _) = const
 eval defs (ExInvocation lambda value) = eval defs $ getContent $ evalInvocation defs (eval defs <$> lambda) value
-eval defs (ExBinding (Ranged _ _ name)) = case defs ! name of Definition _ _ expr -> getContent expr
+eval defs binding@(ExBinding (Ranged _ _ name)) = case defs !? name of
+    Just (Definition _ _ expr) -> eval defs $ getContent expr
+    Nothing -> binding
 eval _ (ExBinOp _ _ _) = error "bin op unimplemented"
 eval _ ExWorldToken = ExWorldToken
 
@@ -25,6 +27,13 @@ evalMatch defs value@(Ranged _ _ (ExConstant (Ranged _ _ c))) ((Ranged _ _ (PatC
 evalMatch defs value (_ : cases) = evalMatch defs value cases
 
 evalInvocation :: Definitions -> Ranged Expr -> Ranged Expr -> Ranged Expr
+evalInvocation defs (Ranged start _ (ExBinding (Ranged _ _ f))) (Ranged _ end val) = case eval defs val of
+    (ExConstant (Ranged _ _ num)) -> case f of
+        "inc" -> Ranged start end $ ExConstant $ Ranged start end $ num + 1
+        "dec" -> Ranged start end $ ExConstant $ Ranged start end $ num - 1
+        _ -> error "invalid function"
+    _ -> error "invalid parameter"
+evalInvocation defs (Ranged start _ (ExBinding (Ranged _ _ "dec"))) (Ranged _ end (ExConstant (Ranged _ _ num))) = Ranged start end $ ExConstant $ Ranged start end $ num - 1
 evalInvocation defs (Ranged start end (ExLambda binding expr)) value = replaceBinding (binding, value) <$> expr
 evalInvocation _ _ _ = error "cannot invoke"
 
