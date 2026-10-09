@@ -1,4 +1,4 @@
-module Result (CompilerError(..), Result(..)) where
+module Result (CompilerError(..), Result(..), unwrap) where
 
 import Ranged (Ranged)
 import Token (Token(..))
@@ -24,3 +24,7 @@ instance Applicative Result where
 instance Monad Result where
     (Err e) >>= _ = Err e
     (Ok a) >>= f = f a
+
+unwrap :: Result a -> a
+unwrap (Ok a) = a
+unwrap (Err e) = error $ show e

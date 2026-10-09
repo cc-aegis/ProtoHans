@@ -1,5 +1,6 @@
 module Ranged (Ranged(..), getStart, getEnd, getContent, nest) where
 
+import Control.Comonad (Comonad(..))
 import Data.Semigroup
 
 data Ranged a = Ranged (Min Int) (Max Int) a
@@ -16,11 +17,16 @@ instance Monad Ranged where
     (Ranged start end content) >>= f = f content >>= Ranged start end
 
 instance Semigroup a => Semigroup (Ranged a) where
-  (Ranged start end content) <> (Ranged start' end' content') = Ranged (start <> start') (end <> end') (content <> content')
+    (Ranged start end content) <> (Ranged start' end' content') = Ranged (start <> start') (end <> end') (content <> content')
 
 instance Show a => Show (Ranged a) where
     show (Ranged (Min start) (Max end) content) = "[" ++ show start ++ ".." ++ show end ++ "]" ++ show content
 
+instance Comonad Ranged where
+    extract (Ranged _ _ a) = a
+    duplicate (Ranged start end a) = Ranged start end (Ranged start end a)
+
+-- DEPRECATED (TODO: replace with duplicate everywhere)
 nest :: Ranged a -> Ranged (Ranged a)
 nest (Ranged start end a) = Ranged start end (Ranged start end a)
 
@@ -30,5 +36,6 @@ getStart (Ranged (Min start) _ _) = start
 getEnd :: Ranged a -> Int
 getEnd (Ranged _ (Max end) _) = end
 
+-- DEPRECATED (TODO: replace with extract everywhere)
 getContent :: Ranged a -> a
 getContent (Ranged _ _ content) = content

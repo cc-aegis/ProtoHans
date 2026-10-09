@@ -1,4 +1,4 @@
-module Parser where
+module Parser (parse, parseSingleExpr) where
 
 import Ranged (Ranged(..), getStart, getEnd, getContent, nest)
 import Result (CompilerError(..), Result(..))
@@ -7,6 +7,12 @@ import Token (Token(..))
 
 import Data.Function (on)
 import qualified Data.Map as Map
+
+parseSingleExpr :: [Ranged Token] -> Result Expr
+parseSingleExpr src = case parseExpr src of
+    Ok (Ranged _ _ expr, []) -> Ok expr
+    Ok (_, (token : _)) -> Err $ UnexpectedToken token
+    Err err -> Err err
 
 parse :: [Ranged Token] -> Result Definitions
 parse [] = Ok Map.empty

@@ -11,7 +11,7 @@ eval :: Definitions -> Expr -> Expr
 eval _ lambda@(ExLambda _ _) = lambda
 eval defs (ExMatch value cases) = eval defs $ getContent $ evalMatch defs (eval defs <$> value) cases
 eval _ const@(ExConstant _) = const
-eval defs (ExInvocation lambda value) = getContent $ evalInvocation defs (eval defs <$> lambda) value
+eval defs (ExInvocation lambda value) = eval defs $ getContent $ evalInvocation defs (eval defs <$> lambda) value
 eval defs (ExBinding (Ranged _ _ name)) = case defs ! name of Definition _ _ expr -> getContent expr
 eval _ (ExBinOp _ _ _) = error "bin op unimplemented"
 eval _ ExWorldToken = ExWorldToken

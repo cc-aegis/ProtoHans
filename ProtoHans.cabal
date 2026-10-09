@@ -71,7 +71,8 @@ executable ProtoHans
     -- Other library packages from which modules are imported.
     build-depends:
         base ^>=4.20.2.0,
-        containers >= 0.6 && < 0.8
+        containers >= 0.6 && < 0.8,
+        comonad
 
     -- Directories containing source files.
     hs-source-dirs:   src
