@@ -32,3 +32,12 @@ match <expr> with [| <pat> = <expr>]+
 ```
 <number>
 ```
+# Pat
+## PatConstant
+```
+<number>
+```
+## PatAny
+```
+_
+```

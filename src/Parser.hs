@@ -52,16 +52,20 @@ parseExpr' :: [Ranged Token] -> Result (Ranged Expr, [Ranged Token])
 parseExpr' (Ranged start end (Token.Ident ident) : Ranged _ _ Token.Arrow : tokens) = do
     (expr, tokens') <- parseExpr tokens
     return (Ranged start (pure $ getEnd expr) (ExLambda (Ranged start end ident) expr), tokens')
---parseExpr (Ranged start _ Token.Match : tokens) = do
---    (value, tokens') <- parseExpr tokens
---    tokens'' <- expectToken Token.With tokens'
---    (cases, tokens''') <- parseMatchCases tokens''
---    return TODO
---
---    where
---        parseMatchCases (Ranged _ _ Token.Pipe : tokens) = do
---
---        parseMatchCases _ = Ok []
+parseExpr' (Ranged start _ Token.Match : tokens) = do
+    (value, tokens') <- parseExpr tokens
+    tokens'' <- expectToken Token.With tokens'
+    (cases, tokens''') <- parseMatchCases tokens''
+    return (ExMatch <$> nest value <*> Ranged start (pure $ getEnd $ snd $ last cases) cases, tokens''')
+
+    where
+        parseMatchCases (Ranged _ _ Token.Pipe : tokens) = do
+            (pat, tokens') <- parsePat tokens
+            tokens'' <- expectToken Token.Bind tokens'
+            (expr, tokens''') <- parseExpr tokens''
+            (rest, tokens'''') <- parseMatchCases tokens'''
+            return ((pat, expr) : rest, tokens'''')
+        parseMatchCases tokens = Ok ([], tokens)
 parseExpr' tokens = parseTinyExpr tokens
 
 parseTinyExpr :: [Ranged Token] -> Result (Ranged Expr, [Ranged Token])
@@ -76,15 +80,13 @@ parseTinyExpr (Ranged start end (Token.Number number) : tokens) =
     return (Ranged start end $ ExConstant . (Ranged start end) . read $ number, tokens)
 parseTinyExpr (token : _) = Err $ UnexpectedToken token
 
----parseExpr tokens = Ok (pure $ ExConstant (pure 0), tokens) -- PLACEHOLDER
-
-    -- DAS IST BS
---expectIdent :: [Ranged Token] -> Result (Ranged String, Ranged Token)
---expectIdent [] = Err Eof
---expectIdent (token:tokens) = (,tokens) <$> tryMapRanged asIdent token
---    where
---        asIdent (Ident ident) = Ok ident
---        asIdent token' = Err $ UnexpectedToken token'
+parsePat :: [Ranged Token] -> Result (Ranged Pat, [Ranged Token])
+parsePat [] = Err Eof
+parsePat (Ranged start end (Token.Number number) : tokens) =
+    return (Ranged start end $ PatConstant . (Ranged start end) . read $ number, tokens)
+parsePat (Ranged start end Token.Underscore : tokens) =
+    return (Ranged start end PatAny, tokens)
+parsePat (token : _) = Err $ UnexpectedToken token
 
 expectIdent :: [Ranged Token] -> Result (Ranged String, [Ranged Token])
 expectIdent [] = Err Eof

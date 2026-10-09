@@ -20,7 +20,7 @@ data Expr = ExLambda (Ranged String) (Ranged Expr)
     | ExBinOp (Ranged BinOperator) (Ranged Expr) (Ranged Expr)
     deriving (Show)
 
-data Pat = PatInt (Ranged Int) | Any
+data Pat = PatConstant (Ranged Int) | PatAny
     deriving (Show)
 
 data BinOperator = Sub | Mul | Dollar

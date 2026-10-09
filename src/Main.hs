@@ -7,4 +7,4 @@ import Parser (parse)
 
 main :: IO ()
 -- main = readFile "../examples/fib.hs" >>= print . (>>= parse) . tokenizeStr
-main = print $ (>>= parse) $ tokenizeStr "sqr :: Int -> Int = x -> mul x x"
+main = print $ (>>= parse) $ tokenizeStr "even :: Int -> Int = x -> match x with | 0 = 1 | 1 = 0 | _ = even (sub x 2)"

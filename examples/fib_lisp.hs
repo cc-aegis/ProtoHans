@@ -1,5 +1,5 @@
 fib :: Int -> Int =
-    n -> match n
+    n -> match n with
         | 0 = 0
         | 1 = 1
         | _ = mul (fib (sub n 1)) (fib (sub n 2))
