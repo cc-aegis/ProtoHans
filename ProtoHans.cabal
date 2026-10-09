@@ -62,14 +62,16 @@ executable ProtoHans
     main-is:          Main.hs
 
     -- Modules included in this executable, other than Main.
-    -- other-modules:
+    other-modules: Lexer Parser Ranged Result Syntax Token
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
     default-extensions: NamedFieldPuns
 
     -- Other library packages from which modules are imported.
-    build-depends:    base ^>=4.20.2.0
+    build-depends:
+        base ^>=4.20.2.0,
+        containers >= 0.6 && < 0.8
 
     -- Directories containing source files.
     hs-source-dirs:   src

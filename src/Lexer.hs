@@ -49,6 +49,7 @@ parseNumber src = Ok (Token.Number <$> sequence ident, rest)
     where (ident, rest) = span (isDigit . getContent) src
 
 tryParseOperator :: [Ranged Char] -> Result (Ranged Token, [Ranged Char])
+tryParseOperator [] = Err Eof
 tryParseOperator (Ranged start _ ':' : Ranged _ end ':' : rest) = Ok (Ranged start end Token.TypeSpec, rest)
 tryParseOperator (Ranged start _ '-' : Ranged _ end '>' : rest) = Ok (Ranged start end Token.Arrow, rest)
 tryParseOperator (Ranged start end operator : rest) = do
