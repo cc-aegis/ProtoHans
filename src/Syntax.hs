@@ -42,9 +42,11 @@ instance Format Type where
 
 instance Format Expr where
     format (ExLambda binding expr) = extract binding ++ " -> " ++ format (extract expr)
-    format (ExMatch value cases) = "match " ++ format (extract value) ++ " with" ++ concatMap (\ (pat, expr) -> " | " ++ format (extract pat) ++ " " ++ format (extract expr)) cases
+    format (ExMatch value cases) = "match " ++ format (extract value) ++ " with" ++ concatMap (\ (pat, expr) -> " | " ++ format (extract pat) ++ " = " ++ format (extract expr)) cases
     format (ExConstant const) = show (extract const)
-    format (ExInvocation lhs rhs) = format (extract lhs) ++ " " ++ format (extract rhs)
+    format (ExInvocation lhs rhs@(Ranged _ _ (ExConstant _))) = format (extract lhs) ++ " " ++ format (extract rhs)
+    format (ExInvocation lhs rhs@(Ranged _ _ (ExBinding _))) = format (extract lhs) ++ " " ++ format (extract rhs)
+    format (ExInvocation lhs rhs) = format (extract lhs) ++ " (" ++ format (extract rhs) ++ ")"
     format (ExBinding binding) = extract binding
     format (ExBinOp op lhs rhs) = "(" ++ show (extract lhs) ++ format (extract op) ++ show (extract rhs) ++ ")"
     format ExWorldToken = "※"
