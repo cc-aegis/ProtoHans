@@ -3,7 +3,7 @@
 ```
 <ident> -> <expr>
 ```
-## ExMatch
+## ExMatch (implemented)
 ```
 match <expr> with [| <pat> = <expr>]+
 ```
@@ -33,11 +33,11 @@ match <expr> with [| <pat> = <expr>]+
 <number>
 ```
 # Pat
-## PatConstant
+## PatConstant (implemented)
 ```
 <number>
 ```
-## PatAny
+## PatAny (implemented)
 ```
 _
 ```
