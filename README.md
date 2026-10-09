@@ -10,7 +10,11 @@ After that, you can repeatedly type queries to run (or `exit` to exit). Example:
 ```
 query: fib 10
 55
-query: id add (fib 4) (sqr (dec 3))
+query: id
+x -> x
+query: id id id miku
+39
+query: add (fib 4) (sqr (dec 3))
 7
 ```
 

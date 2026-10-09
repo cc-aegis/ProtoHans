@@ -1,4 +1,4 @@
-answer :: Int = 42
+miku :: Int = 39
 
 id :: Int -> Int = x -> x
 
