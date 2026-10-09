@@ -14,8 +14,12 @@ query: id
 x -> x
 query: id id id miku
 39
+query: (x -> y -> x) 6 7
+6
 query: add (fib 4) (sqr (dec 3))
 7
+query: (f -> a -> f (f (f a))) inc miku
+42
 ```
 
 Please note: `math.hs` is the only example that currently works :/
