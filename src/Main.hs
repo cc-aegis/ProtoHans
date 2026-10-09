@@ -7,4 +7,4 @@ import Parser (parse)
 
 main :: IO ()
 -- main = readFile "../examples/fib.hs" >>= print . (>>= parse) . tokenizeStr
-main = print $ (>>= parse) $ tokenizeStr "true :: Int -> Int -> Int = x -> y -> (4)"
+main = print $ (>>= parse) $ tokenizeStr "sqr :: Int -> Int = x -> mul x x"

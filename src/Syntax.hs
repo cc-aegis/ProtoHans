@@ -15,7 +15,7 @@ data Type = TyInt | TyWorld | TyFunction (Ranged Type) (Ranged Type)
 data Expr = ExLambda (Ranged String) (Ranged Expr)
     | ExMatch (Ranged Expr) [(Ranged Pat, Ranged Expr)]
     | ExConstant (Ranged Int)
-    | ExIvocation (Ranged Expr) (Ranged Expr)
+    | ExInvocation (Ranged Expr) (Ranged Expr)
     | ExBinding (Ranged String)
     | ExBinOp (Ranged BinOperator) (Ranged Expr) (Ranged Expr)
     deriving (Show)

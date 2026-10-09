@@ -1,5 +1,5 @@
 # Expr
-## ExLambda
+## ExLambda (implemented)
 ```
 <ident> -> <expr>
 ```
@@ -7,7 +7,7 @@
 ```
 match <expr> with [| <pat> = <expr>]+
 ```
-## ExInvocation
+## ExInvocation (implemented)
 ```
 <expr> <tinyexpr>
 ```
@@ -15,20 +15,20 @@ match <expr> with [| <pat> = <expr>]+
 ```
 <expr> <binop> <expr>
 ```
-## Other
+## Other (implemented)
 ```
 <tinyexpr>
 ```
 # TinyExpr
-## Brackets
+## Brackets (implemented)
 ```
 (<expr>)
 ```
-## ExBinding
+## ExBinding (implemented)
 ```
 <ident>
 ```
-## ExConstant
+## ExConstant (implemented)
 ```
 <number>
 ```

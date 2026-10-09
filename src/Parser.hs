@@ -5,6 +5,7 @@ import Result (CompilerError(..), Result(..))
 import Syntax (Definitions, Definition(..), Type(..), Expr(..), Pat(..), BinOperator(..))
 import Token (Token(..))
 
+import Data.Function (on)
 import qualified Data.Map as Map
 
 parse :: [Ranged Token] -> Result Definitions
@@ -38,7 +39,17 @@ parseType tokens = do
         _ -> Ok (lht, tokens')
 
 parseExpr :: [Ranged Token] -> Result (Ranged Expr, [Ranged Token])
-parseExpr (Ranged start end (Token.Ident ident) : Ranged _ _ Token.Arrow : tokens) = do
+parseExpr tokens = do
+    (expr, tokens') <- parseExpr' tokens
+    let (params, tokens'') = parseParams tokens'
+    return (foldl (liftA2 ExInvocation `on` nest) expr params, tokens'')
+    where parseParams tokens =
+            case parseTinyExpr tokens of
+                Ok (param, tokens') -> let (params, tokens'') = parseParams tokens' in (param : params, tokens'')
+                Err _ -> ([], tokens)
+
+parseExpr' :: [Ranged Token] -> Result (Ranged Expr, [Ranged Token])
+parseExpr' (Ranged start end (Token.Ident ident) : Ranged _ _ Token.Arrow : tokens) = do
     (expr, tokens') <- parseExpr tokens
     return (Ranged start (pure $ getEnd expr) (ExLambda (Ranged start end ident) expr), tokens')
 --parseExpr (Ranged start _ Token.Match : tokens) = do
@@ -51,7 +62,7 @@ parseExpr (Ranged start end (Token.Ident ident) : Ranged _ _ Token.Arrow : token
 --        parseMatchCases (Ranged _ _ Token.Pipe : tokens) = do
 --
 --        parseMatchCases _ = Ok []
-parseExpr tokens = parseTinyExpr tokens
+parseExpr' tokens = parseTinyExpr tokens
 
 parseTinyExpr :: [Ranged Token] -> Result (Ranged Expr, [Ranged Token])
 parseTinyExpr [] = Err Eof
