@@ -17,4 +17,5 @@ data Token = Ident String -- thing
     | RParen
     | Match
     | With
+    | DefSep -- newline before new declaration
     deriving (Eq, Show)

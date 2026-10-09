@@ -17,6 +17,7 @@ parse tokens = do
     return $ Map.insert (getContent name) def defs
 
 parseDefinition :: [Ranged Token] -> Result (Definition, [Ranged Token])
+parseDefinition (Ranged _ _ Token.DefSep : tokens) = parseDefinition tokens
 parseDefinition tokens = do
     (name, tokens') <- expectIdent tokens
     tokens'' <- expectToken Token.TypeSpec tokens'

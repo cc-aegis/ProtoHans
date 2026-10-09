@@ -24,11 +24,15 @@ tokenize src -- TODO: case of
 nextToken :: [Ranged Char] -> Result (Ranged Token, [Ranged Char])
 nextToken [] =  Err Eof
 nextToken (c:cs)
+    | getContent c == '\n' && headIsLower cs = Ok (Ranged (pure $ getStart c) (pure $ getEnd c) Token.DefSep, cs)
     | isSpace $ getContent c = nextToken cs
     | isLower $ getContent c = parseIdent (c:cs)
     | isUpper $ getContent c = parseTypeName (c:cs)
     | isDigit $ getContent c = parseNumber (c:cs)
     | otherwise = tryParseOperator (c:cs)
+    where
+        headIsLower (h:_) = isLower $ getContent h
+        headIsLower _ = False
 
 parseIdent :: [Ranged Char] -> Result (Ranged Token, [Ranged Char])
 parseIdent src = case sequence ident of
