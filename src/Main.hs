@@ -2,9 +2,12 @@
 
 module Main (main) where
 
+import Eval (eval, invokeMain)
 import Lexer (tokenizeStr)
 import Parser (parse)
 
 main :: IO ()
-main = readFile "examples/fib_lisp.hs" >>= print . (>>= parse) . tokenizeStr
--- main = print $ (>>= parse) $ tokenizeStr "even :: Int -> Int = x -> match x with | 0 = 1 | 1 = 0 | _ = even (sub x 2)"
+main = do
+    let src = "main :: World -> Int = w -> 42"
+    let result = tokenizeStr src >>= parse >>= \ defs -> return $ eval defs invokeMain
+    print result

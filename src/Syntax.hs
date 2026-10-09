@@ -18,6 +18,7 @@ data Expr = ExLambda (Ranged String) (Ranged Expr)
     | ExInvocation (Ranged Expr) (Ranged Expr)
     | ExBinding (Ranged String)
     | ExBinOp (Ranged BinOperator) (Ranged Expr) (Ranged Expr)
+    | ExWorldToken
     deriving (Show)
 
 data Pat = PatConstant (Ranged Int) | PatAny
