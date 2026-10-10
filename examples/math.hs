@@ -24,3 +24,5 @@ mul :: Int -> Int -> Int =
         | _ = (add x (mul x (dec y)))
 
 sqr :: Int -> Int = x -> mul x x
+
+twinc :: Int -> Int = add 2
