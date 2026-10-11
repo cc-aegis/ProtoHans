@@ -14,7 +14,7 @@ head :: List a -> a = list -> list 0
 tail :: List a -> List a = list -> list 1
 
 nums :: List Int = cons 0 (cons 1 (cons 2 (cons 3 nil)))
-rec :: List Int = cons 1 rec
+rec :: List Int = y (cons 1)
 
 nth :: Int -> List a -> a =
     idx -> match idx with
