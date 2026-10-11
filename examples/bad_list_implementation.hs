@@ -16,4 +16,15 @@ nth :: Int -> List a -> a =
         | 0 = head
         | _ = dot (nth (dec idx)) tail
 
-dot :: (b -> c) -> (a -> b) -> a -> c = f -> g -> x -> f (g x)
+dot :: (b -> c) -> (a -> b) -> a -> c =
+    f -> g -> x -> f (g x)
+
+add :: Int -> Int -> Int =
+    x -> y -> match y with
+        | 0 = x
+        | _ = add (inc x) (dec y)
+
+zipWith :: (a -> b -> c) -> List a -> List b -> List c =
+    f -> lhs -> rhs -> cons (f (head lhs) (head rhs)) (zipWith f (tail lhs) (tail rhs))
+
+fibs :: List Int = cons 0 (cons 1 (zipWith add fibs (tail fibs)))
