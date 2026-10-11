@@ -10,7 +10,11 @@ type Definitions = Map String Definition
 data Definition = Definition (Ranged String) (Ranged Type) (Ranged Expr)
     deriving (Show)
 
-data Type = TyInt | TyWorld | TyFunction (Ranged Type) (Ranged Type)
+data Type = TyInt
+    | TyWorld
+    | TyFunction (Ranged Type) (Ranged Type)
+    | TyGeneric (Ranged String)
+    | TyStruct (Ranged String) [Ranged Type]
     deriving (Show)
 
 data Expr = ExLambda (Ranged String) (Ranged Expr)
@@ -39,6 +43,8 @@ instance Format Type where
     format TyWorld = "World"
     format (TyFunction lhs@(Ranged _ _ (TyFunction _ _)) rhs) = "(" ++ format (extract lhs) ++ ")" ++ " -> " ++ format (extract rhs)
     format (TyFunction lhs rhs) = format (extract lhs) ++ " -> " ++ format (extract rhs)
+    format (TyGeneric name) = extract name
+    format (TyStruct name generics) = extract name ++ concatMap ((" "++) . format . extract) generics
 
 instance Format Expr where
     format (ExLambda binding expr) = extract binding ++ " -> " ++ format (extract expr)

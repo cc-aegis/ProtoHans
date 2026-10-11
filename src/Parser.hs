@@ -36,14 +36,31 @@ parseType :: [Ranged Token] -> Result (Ranged Type, [Ranged Token])
 parseType tokens = do
     (lht, tokens') <- case tokens of
         [] -> Err Eof
+        (Ranged start _ Token.LParen : rest) -> do
+            ((Ranged _ _ inner), rest') <- parseType rest
+            (Ranged _ end _, rest'') <- expectCondToken (==Token.RParen) rest'
+            return (Ranged start end $ inner, rest'')
         (Ranged start end Token.Int : rest) -> Ok (Ranged start end TyInt, rest)
         (Ranged start end Token.World : rest) -> Ok (Ranged start end TyWorld, rest)
+        (Ranged start end (Token.Ident generic) : rest) -> Ok (Ranged start end (TyGeneric (Ranged start end generic)), rest)
+        (Ranged start end (Token.TypeName typeName) : rest) -> do
+            (generics, rest') <- parseGenerics rest
+            let end' = case generics of
+                    [] -> end
+                    _ -> pure $ getEnd $ last generics
+            return (Ranged start end (TyStruct (Ranged start end' typeName) generics), rest')
         (rangedToken : _) -> Err $ UnexpectedToken rangedToken
     case tokens' of
         (Ranged _ _ Token.Arrow : tokens'') -> do
             (rht, tokens''') <- parseType tokens''
             Ok (TyFunction <$> nest lht <*> nest rht, tokens''') -- does this work?
         _ -> Ok (lht, tokens')
+    where
+        parseGenerics tokens = case parseType tokens of
+            Ok (type', tokens') -> do
+                (types, tokens'') <- parseGenerics tokens'
+                return (type' : types, tokens'')
+            Err _ -> return ([], tokens)
 
 parseExpr :: [Ranged Token] -> Result (Ranged Expr, [Ranged Token])
 parseExpr tokens = do

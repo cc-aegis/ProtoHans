@@ -21,5 +21,3 @@ query: add (fib 4) (sqr (dec 3))
 query: (f -> a -> f (f (f a))) inc miku
 42
 ```
-
-Please note: `math.hs` is the only example that currently works :/
