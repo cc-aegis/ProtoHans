@@ -24,7 +24,9 @@ add :: Int -> Int -> Int =
         | 0 = x
         | _ = add (inc x) (dec y)
 
+y :: (a -> a) -> a = f -> (x -> f (x x)) (x -> f (x x))
+
 zipWith :: (a -> b -> c) -> List a -> List b -> List c =
     f -> lhs -> rhs -> cons (f (head lhs) (head rhs)) (zipWith f (tail lhs) (tail rhs))
 
-fibs :: List Int = cons 0 (cons 1 (zipWith add fibs (tail fibs)))
+fibs :: List Int = y (self -> cons 0 (cons 1 (zipWith add self (tail self))))
