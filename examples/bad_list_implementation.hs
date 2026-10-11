@@ -65,3 +65,5 @@ last :: List a -> a =
     l -> (isNil (tail l))
         (head l)
         (last (tail l))
+
+nats :: List Int = y (dot (cons 1) (map inc))
