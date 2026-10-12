@@ -67,3 +67,15 @@ last :: List a -> a =
         (last (tail l))
 
 nats :: List Int = y (dot (cons 1) (map inc))
+
+eq :: Int -> Int -> (a -> a -> a) =
+    x -> y -> match x with
+        | 0 = (match y with | 0 = true | _ = false)
+        | _ = (match y with | 0 = false | _ = eq (dec x) (dec y))
+
+contains :: a -> List a -> (b -> b -> b) =
+    x -> list -> (isNil list)
+        false
+        ((eq x (head list))
+            true
+            (contains x (tail list)))
